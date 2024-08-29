@@ -1,47 +1,35 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pylab as plt
-import audio_plot
+from config import ALL_PATHS, POSSIBLE_SENSORS
+from instruments import InstrumentCombinations
 
+#return random.choice(matching_combinations)
+def get_random_instrument_combination(sensor_count):
+    matching_combinations = []
+    
+    for combination in InstrumentCombinations:
+        if len(combination.value) <= sensor_count:
+            matching_combinations.append({combination: combination.value[:sensor_count]}) 
+    
+    if not matching_combinations:
+        return []
+    
+    return matching_combinations
 
-# List of possible columns
-possible_columns = [
-    'PM2_5 μg/m3',
-    'CO2 ppm',
-    'HUMIDITY %',
-    'TEMP °C',
-    'VOC ppb',
-    'PRESSURE hPa',
-    'PM1 μg/m3',
-    'SOUND_LEVEL_A dBSPL',
-    'LIGHT %'
-]
-
-
-all_paths = {
-    "bad-air-quality/yearly/": 1,
-    "moderate-air-quality/yearly/": 3,
-    "moderate-air-quality/monthly/": 1,
-    "good-air-quality/yearly/": 3,
-}
-
-for paths in all_paths: 
+for paths in ALL_PATHS: 
     folder_path = paths
-    files = all_paths[folder_path]
+    files = ALL_PATHS[folder_path]
 
     for set_number in range(1, files + 1):  
         path = f"{folder_path}set{set_number}.csv"
         
         df = pd.read_csv(path, delimiter=';') 
 
-        # Find which of the possible columns are present in the DataFrame
-        available_columns = [col for col in possible_columns if col in df.columns]
+        available_columns = [col for col in POSSIBLE_SENSORS if col in df.columns]
+        all_valid_instrument_combination = get_random_instrument_combination(len(available_columns))
+        print(all_valid_instrument_combination)
 
-        # Extract only the available columns from the DataFrame
         df_filtered = df[available_columns]
-
-        # Display the first few rows of the filtered DataFrame
-        print(df_filtered.head())
 
 
     
