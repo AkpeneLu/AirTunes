@@ -1,8 +1,8 @@
 ALL_PATHS = {
-    "bad-air-quality/yearly/": 1,
-    "moderate-air-quality/yearly/": 3,
-    "moderate-air-quality/monthly/": 1,
-    "good-air-quality/yearly/": 3,
+   # "bad-air-quality/yearly/": 1,
+   # "moderate-air-quality/yearly/": 3,
+   # "moderate-air-quality/monthly/": 1,
+    "good-air-quality/yearly/": 1 #3,
 }
 
 
