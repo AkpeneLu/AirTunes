@@ -49,6 +49,23 @@ def map_sensors_to_instrument(df_filtered, combinations):
                     assigned_sensors.add(best_fit_column) 
     return sensor_to_instrument_mapping
 
+def get_sensor_threshold_mapping(df_filtered):
+    sensor_to_threshold_mapping = {}
+    
+    for column in df_filtered.columns:
+        data = df_filtered[column]
+        max = data.max()
+        min = data.min()
+        # Calculate the range of the data
+        data_range = max - min
+        # Set the threshold as one-third of the range
+        threshold = min + (data_range / 3)
+        # Store the threshold in the dictionary
+        sensor_to_threshold_mapping[column] = {"threshold": threshold, "min": min, "max" : max}
+
+    return sensor_to_threshold_mapping
+        
+
 def scale_data(data, factor=10):
     return (data - data.min()) * factor / (data.max() - data.min())
 
@@ -204,10 +221,10 @@ for paths in ALL_PATHS:
         df_filtered = df_filtered[df_filtered.shift() != df_filtered]
         df_filtered = df_filtered.dropna()
 
-        mapping = map_sensors_to_instrument(df_filtered, all_valid_instrument_combination)
-
-        drum_data = scale_data(df_filtered[mapping.get('DRUMS', 'VOC ppb')], factor=1000)
-        piano_data = scale_data(df_filtered[mapping.get('PIANO', 'LIGHT %')], factor=100)
+        instrument_mapping = map_sensors_to_instrument(df_filtered, all_valid_instrument_combination)
+        threshold_mapping = get_sensor_threshold_mapping(df_filtered)
+        drum_data = scale_data(df_filtered[instrument_mapping.get('DRUMS', 'VOC ppb')], factor=1000)
+        piano_data = scale_data(df_filtered[instrument_mapping.get('PIANO', 'LIGHT %')], factor=100)
 
         session = Session(tempo=120)
         #drums = session.new_midi_part("drums", 2)
