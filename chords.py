@@ -33,7 +33,7 @@ CHORDS = {
 }
 
 
-def map_value_to_note(value, value_min, value_max):
+def map_value_to_chord(value, value_min, value_max):
     """Map a sensor value to a chord."""
     chord_names = list(CHORDS.keys())
     num_chords = len(chord_names)

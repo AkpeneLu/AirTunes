@@ -93,10 +93,6 @@ def play_instruments(piano_instrument, snare_drum_instrument, drum_data, piano_d
 
 
 
-
-
-
-
 # Define a chord progression
 chords = [
     (60, 64, 67),  # C Major (C, E, G)
@@ -225,6 +221,8 @@ for paths in ALL_PATHS:
         threshold_mapping = get_sensor_threshold_mapping(df_filtered)
         drum_data = scale_data(df_filtered[instrument_mapping.get('DRUMS', 'VOC ppb')], factor=1000)
         piano_data = scale_data(df_filtered[instrument_mapping.get('PIANO', 'LIGHT %')], factor=100)
+        piano_boolean = [0 if value <= threshold_mapping['LIGHT %']["threshold"] else 1 for value in piano_data]
+
 
         session = Session(tempo=120)
         #drums = session.new_midi_part("drums", 2)
