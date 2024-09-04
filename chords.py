@@ -32,10 +32,49 @@ CHORDS = {
     "G_sharp_minor": [68, 71, 75],   # G#4, B4, D#5
 }
 
+notes = [60, 62, 64, 67, 69, 60, 62, 64, 67, 69, 60, 62, 64, 67, 69, 60, 62, 64, 67, 69, 60, 62, 64, 67, 69, 60, 62, 64, 67, 69, 60, 62, 64, 67, 69, 60, 62, 64, 67, 69]
+duration = [1.0, 0.25, 1.0, 2.0, 0.25, 0.5, 1.0, 2.0, 0.25, 1.0, 2.0, 0.25, 0.5, 1.0, 2.0, 0.5, 0.25, 2.0, 0.25, 2.0, 0.5, 1.0, 1.0, 0.5, 0.25, 2.0, 0.25, 0.5, 0.5, 1.0, 0.5, 1.0, 2.0, 2.0, 2.0, 0.5, 0.25, 0.25, 0.5, 1.0, 2.0, 0.25, 0.5]
+#random.shuffle(duration)
 
-def map_value_to_note(value, value_min, value_max):
+def map_value_to_chord(value, value_min, value_max):
     """Map a sensor value to a chord."""
+
+    
     chord_names = list(CHORDS.keys())
     num_chords = len(chord_names)
     scaled_value = int((value - value_min) / (value_max - value_min) * (num_chords - 1))
     return CHORDS[chord_names[scaled_value]]
+
+
+def map_value_to_note(values):
+    """Map a sensor value to a chord."""
+
+    value_min = min(values)
+    value_max = max(values)
+
+    num_notes = len(notes)
+    notes_to_play = [0] * len(values)
+    i=0
+    for value in values:
+        scaled_value = int((value - value_min) / (value_max - value_min) * (num_notes - 1))
+        notes_to_play[i] = notes[scaled_value]
+        i += 1
+
+    return notes_to_play
+
+def map_value_to_duration(values):
+    """Map a sensor value to a duration."""
+
+    value_min = min(values)
+    value_max = max(values)
+
+    num_duration = len(duration)
+    duration_to_play = [0] * len(values)
+    i=0
+    for value in values:
+        scaled_value = int((value - value_min) / (value_max - value_min) * (num_duration - 1))
+        #print(num_duration, scaled_value)
+        duration_to_play[i] = duration[scaled_value]
+        i += 1
+    
+    return duration_to_play

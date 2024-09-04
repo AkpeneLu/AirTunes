@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from chords import map_value_to_chord
+from chords import map_value_to_note, map_value_to_duration
 from config import ALL_PATHS, POSSIBLE_SENSORS
 from instrument_patterns import InstrumentPatterns
 from instruments import InstrumentCombinations
@@ -160,12 +160,15 @@ random_numbers_2 = [(random.choice(notes), random.choice(durada)) for _ in range
             trumpet.play_note(note, 0.8, duration)
             wait(duration/2)"""
 
-def play_trumpet(random_numbers):
+def play_trumpet(notes, durations):
+    # Pairing notes with durations
+    list_notes = list(zip(notes, durations))  # Creates a list of (note, duration) tuples
+    
+    # Infinite loop (be careful with this)
     while True:
-        for note in random_numbers:
-            trumpet.play_note(note, 0.8, 1.0)
-            wait(0.5)
-
+        for note, duration in list_notes:
+            trumpet.play_note(note, 0.8, duration)  # Play the note
+            wait(duration / 2)  # Wait for half the duration
 
 # Function to play the violin melody
 def play_violin():
@@ -224,19 +227,22 @@ for paths in ALL_PATHS:
         instrument_mapping = map_sensors_to_instrument(df_filtered, all_valid_instrument_combination)
         threshold_mapping = get_sensor_threshold_mapping(df_filtered)
         drum_data = scale_data(df_filtered[instrument_mapping.get('DRUMS', 'VOC ppb')], factor=1000)
-        piano_data = scale_data(df_filtered[instrument_mapping.get('PIANO', 'LIGHT %')], factor=100)
+        trumpet_data = scale_data(df_filtered[instrument_mapping.get('PIANO', 'LIGHT %')], factor=100)
+
+        trumpet_notes = map_value_to_note(trumpet_data)
+        trumpet_duration = map_value_to_duration(trumpet_data)
 
         session = Session(tempo=120)
         #drums = session.new_midi_part("drums", 2)
 
-        #session.fork(play_drums)
-        #session.fork(play_drums_2)
+        session.fork(play_drums)
+        session.fork(play_drums_2)
         wait(9)
-        #session.fork(play_drums_3)
+        session.fork(play_drums_3)
         wait(3)
-        #session.fork(play_piano)
-        #<wait(12)
-        session.fork(play_trumpet(piano_data))
+        session.fork(play_piano)
+        wait(12)
+        session.fork(play_trumpet(trumpet_notes, trumpet_duration))
         wait(12)
         #session.fork(play_violin)
         wait(400)
