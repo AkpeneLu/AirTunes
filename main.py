@@ -7,6 +7,18 @@ from instruments import InstrumentCombinations
 from scamp import *
 import random
 
+# Create a SCAMP session
+session = Session()
+
+session.tempo = 120
+
+# Set up the instruments
+piano = session.new_part("piano")
+trumpet = session.new_part("trumpet")
+violin = session.new_part("violin")
+bass = session.new_part("acoustic bass")
+drums = session.new_part("drum set", preset="Standard Drum Kit")
+
 def get_random_instrument_combination(sensor_count):
     matching_combinations = {}
     for combination in InstrumentCombinations:
@@ -62,40 +74,120 @@ def play_instruments(piano_instrument, snare_drum_instrument, drum_data, piano_d
         #snare_drum_instrument.play_note(38, snare_drum_velocity, drum_duration)  # Acoustic Snare Drum (MIDI note 38)
         wait(drum_duration)
 
-# Function to play hi-hat rhythm based on sensor data
-def play_hi_hat(sensor_value):
-    for _ in range(8):  # Eight beats in a measure
-        probability = sensor_value / 100.0  # Normalize sensor value to [0, 1]
-        if random.uniform(0, 1) < probability:
-            drums.play_note(DRUM_MAPPING["closed_hi_hat"], 1, 0.5)
-        else:
-            drums.play_note(DRUM_MAPPING["closed_hi_hat"], 1, 0.25)
-            drums.play_note(DRUM_MAPPING["closed_hi_hat"], 1, 0.25)
 
-# Function to play backbeat rhythm based on sensor data
-def play_backbeat(sensor_value):
-    for i in range(4):  # Four beats in a measure
-        if i % 2 == 0:  # Play bass drum on beats 1 and 3
-            probability_bass = sensor_value / 150.0
-            if random.uniform(0, 1) < probability_bass:
-                drums.play_note(DRUM_MAPPING["bass_drum"], 1, 1)
-            else:
-                drums.play_note(DRUM_MAPPING["bass_drum"], 1, 0.5)
-                drums.play_note(DRUM_MAPPING["bass_drum"], 1, 0.5)
-        else:  # Play snare drum on beats 2 and 4
-            probability_snare = sensor_value / 100.0
-            if random.uniform(0, 1) < probability_snare:
-                drums.play_note(DRUM_MAPPING["snare"], 1, 1)
-            else:
-                drums.play_note(DRUM_MAPPING["snare"], 1, 0.75)
-                drums.play_note(DRUM_MAPPING["snare"], 1, 0.25)
 
-# Main loop to generate the rhythm based on sensor data
-def generate_drum_pattern(session, sensor_data):
-    for sensor_value in sensor_data:
-        session.fork(play_hi_hat, args=(sensor_value,))
-        session.fork(play_backbeat, args=(sensor_value,))
-        wait(4)  # Wait for the measure to finish before repeating
+
+
+
+
+# Define a chord progression
+chords = [
+    (60, 64, 67),  # C Major (C, E, G)
+    (57, 60, 64),  # A Minor (A, C, E)
+    (55, 59, 62),  # G Major (G, B, D)
+    (53, 57, 60)   # F Major (F, A, C)
+]
+
+# Define the melody for trumpet and violin
+melody_trumpet = [60, 62, 64, 65, 67, 69, 71, 72]  # C major scale
+melody_violin = [72, 71, 69, 67, 65, 64, 62, 60]   # Descending C major scale
+
+# Define a bassline
+bassline = [36, 40, 43, 41]  # C, E, G, F in lower octaves
+
+# Define a simple drum pattern (kick, snare, hi-hat)
+drum_pattern = [
+    (0, 0.75),  # Kick drum on beat 1
+    (42, 0.25), # Closed hi-hat on the "and" of beat 1
+    (0, 0.75),  # Kick drum on beat 1
+    (42, 0.25), # Closed hi-hat on the "and" of beat 1
+    (0, 0.75),  # Kick drum on beat 1
+    (42, 0.25), # Closed hi-hat on the "and" of beat 1
+    (0, 0.75),  # Kick drum on beat 1
+    (42, 0.25), # Closed hi-hat on the "and" of beat 1
+]
+
+drum_pattern_2 = [
+    (36, 1),  # Kick drum on beat 1
+    (36, 1),  # Kick drum on beat 1
+    (36, 1),  # Kick drum on beat 1
+    (36, 1),  # Kick drum on beat 1
+]
+
+drum_pattern_3 = [
+    (36, 0.5),  # Kick drum on beat 1
+    (36, 0.5),  # Kick drum on beat 1
+    (36, 0.5),  # Kick drum on beat 1
+    (36, 0.5),  # Kick drum on beat 1
+]
+
+# Function to play the piano chords
+def play_piano():
+    while True:
+        for chord in chords:
+            piano.play_chord(chord, 1, 2)  # Play each chord for 1.5 seconds
+            #piano.play_chord(chord, 1, 0.1)  # Play each chord for 1.5 seconds
+            wait(1)
+
+notes = [60, 62, 64, 67, 69]
+durada = [1.0, 2.0, 0.25, 0.5]
+random_numbers = [(random.choice(notes), random.choice(durada)) for _ in range(80)]
+random_numbers_2 = [(random.choice(notes), random.choice(durada)) for _ in range(80)]
+
+#random_numbers = random.choices(notes, k=80)
+
+# Function to play the trumpet melody
+"""def play_trumpet():
+    while True:
+        for note, duration in random_numbers:
+            trumpet.play_note(note, 0.8, duration)
+            wait(duration/2)"""
+
+def play_trumpet(random_numbers):
+    while True:
+        for note in random_numbers:
+            trumpet.play_note(note, 0.8, 1.0)
+            wait(0.5)
+
+
+# Function to play the violin melody
+def play_violin():
+    while True:
+        for note, duration in random_numbers_2:
+            violin.play_note(note, 0.8, duration)
+            wait(duration/2)
+
+def play_piano():
+    while True:
+        for chord in chords:
+            piano.play_chord(chord, 1, 2)  # Play each chord for 1.5 seconds
+            #piano.play_chord(chord, 1, 0.1)  # Play each chord for 1.5 seconds
+            wait(1)
+
+# Function to play the bassline
+def play_bass():
+    for note in bassline:
+        bass.play_note(note, 1.2, 1.5)
+        wait(1.5)
+
+# Function to play the drum pattern
+def play_drums():
+    while True:
+        for drum, duration in drum_pattern:
+            drums.play_note(drum, 1.0, duration)
+            wait(duration / 2)
+
+def play_drums_2():
+    while True:
+        for drum, duration in drum_pattern_2:
+            drums.play_note(drum, 1.0, duration)
+            wait(duration / 2)
+
+def play_drums_3():
+    while True:
+        for drum, duration in drum_pattern_3:
+            drums.play_note(drum, 1.0, duration)
+            wait(duration / 2)
 
 # Main processing loop
 for paths in ALL_PATHS: 
@@ -117,22 +209,19 @@ for paths in ALL_PATHS:
         drum_data = scale_data(df_filtered[mapping.get('DRUMS', 'VOC ppb')], factor=1000)
         piano_data = scale_data(df_filtered[mapping.get('PIANO', 'LIGHT %')], factor=100)
 
-        session = Session(tempo=140)
-        drums = session.new_midi_part("drums", 2)
+        session = Session(tempo=120)
+        #drums = session.new_midi_part("drums", 2)
 
-        DRUM_MAPPING = {
-            "bass_drum": 36,
-            "snare": 38,
-            "closed_hi_hat": 42,
-            "open_hi_hat": 46,
-            "ride": 51,
-            "crash": 49,
-        }
-
-        drum_instrument = session.new_part("snare_drum")  # Correct the instrument part name
-        piano_instrument = session.new_part("piano")
-        
-        play_instruments(piano_instrument, drum_instrument, drum_data, piano_data)
-        generate_drum_pattern(session, drum_data)
+        #session.fork(play_drums)
+        #session.fork(play_drums_2)
+        wait(9)
+        #session.fork(play_drums_3)
+        wait(3)
+        #session.fork(play_piano)
+        #<wait(12)
+        session.fork(play_trumpet(piano_data))
+        wait(12)
+        #session.fork(play_violin)
+        wait(400)
 
         session.run()

@@ -65,6 +65,7 @@ def play_piano():
 notes = [60, 62, 64, 67, 69]
 durada = [1.0, 2.0, 0.25, 0.5]
 random_numbers = [(random.choice(notes), random.choice(durada)) for _ in range(80)]
+random_numbers_2 = [(random.choice(notes), random.choice(durada)) for _ in range(80)]
 
 #random_numbers = random.choices(notes, k=80)
 
@@ -77,9 +78,10 @@ def play_trumpet():
 
 # Function to play the violin melody
 def play_violin():
-    for note in chords:
-        violin.play_note(note, 0.6, 1.0)
-        wait(0.5)
+    while True:
+        for note, duration in random_numbers_2:
+            violin.play_note(note, 0.8, duration)
+            wait(duration/2)
 
 def play_piano():
     while True:
@@ -133,4 +135,6 @@ wait(3)
 session.fork(play_piano)
 wait(12)
 session.fork(play_trumpet)
+wait(12)
+#session.fork(play_violin)
 wait(400)
