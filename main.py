@@ -69,6 +69,7 @@ def get_sensor_threshold_mapping(df_filtered):
 def scale_data(data, factor=10):
     return (data - data.min()) * factor / (data.max() - data.min())
 
+"""
 def play_instruments(piano_instrument, snare_drum_instrument, drum_data, piano_data):
     value_min = min(piano_data)
     value_max = max(piano_data)
@@ -90,7 +91,7 @@ def play_instruments(piano_instrument, snare_drum_instrument, drum_data, piano_d
 
         #snare_drum_instrument.play_note(38, snare_drum_velocity, drum_duration)  # Acoustic Snare Drum (MIDI note 38)
         wait(drum_duration)
-
+"""
 
 
 # Define a chord progression
@@ -224,12 +225,17 @@ for paths in ALL_PATHS:
         threshold_mapping = get_sensor_threshold_mapping(df_filtered)
         drum_data = scale_data(df_filtered[instrument_mapping.get('DRUMS', 'VOC ppb')], factor=1000)
         trumpet_data = scale_data(df_filtered[instrument_mapping.get('PIANO', 'LIGHT %')], factor=100)
-
-        trumpet_notes = map_value_to_note(trumpet_data)
-        trumpet_duration = map_value_to_duration(trumpet_data)
         piano_data = scale_data(df_filtered[instrument_mapping.get('PIANO', 'LIGHT %')], factor=100)
-        piano_boolean = [0 if value <= threshold_mapping['LIGHT %']["threshold"] else 1 for value in piano_data]
 
+        air_status = [0 if value <= threshold_mapping['LIGHT %']["threshold"] else 1 for value in piano_data]
+
+
+
+        trumpet_notes = map_value_to_note(trumpet_data, air_status)
+        trumpet_duration = map_value_to_duration(trumpet_data, air_status)
+        
+
+        
 
         session = Session(tempo=120)
         #drums = session.new_midi_part("drums", 2)
