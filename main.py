@@ -69,38 +69,25 @@ def get_sensor_threshold_mapping(df_filtered):
 def scale_data(data, factor=10):
     return (data - data.min()) * factor / (data.max() - data.min())
 
-"""
-def play_instruments(piano_instrument, snare_drum_instrument, drum_data, piano_data):
-    value_min = min(piano_data)
-    value_max = max(piano_data)
 
-    for drum_value, piano_value in zip(drum_data, piano_data):
-        snare_drum_velocity = min(max(int(drum_value), 30), 127)  # Use the sensor data directly for velocity
-        piano_chord = map_value_to_chord(piano_value, value_min, value_max)
-        drum_duration = max(0.1, 1.0 - (drum_value / max(drum_data) * 0.9))  # Normalize and invert
-
-        note_handles = []
-        for note in piano_chord:
-            note_handle = piano_instrument.start_note(note, 0.8)  # Start each note in the chord
-            note_handles.append(note_handle)
-        
-        wait(0.5)  # Hold the chord for the duration
-
-        for note_handle in note_handles:
-            piano_instrument.end_note(note_handle)
-
-        #snare_drum_instrument.play_note(38, snare_drum_velocity, drum_duration)  # Acoustic Snare Drum (MIDI note 38)
-        wait(drum_duration)
-"""
 
 
 # Define a chord progression
-chords = [
+happy_chords= [
     (60, 64, 67),  # C Major (C, E, G)
     (57, 60, 64),  # A Minor (A, C, E)
     (55, 59, 62),  # G Major (G, B, D)
     (53, 57, 60)   # F Major (F, A, C)
 ]
+
+x = 12
+sad_chords = [
+    (63 - x, 66 - x, 69 - x),  # D# diminished (D#, F#, A)
+    (60 - x, 64 - x, 67 - x),  # C diminished (C, D#, F#)
+    (57 - x, 60 - x, 64 - x),  # A diminished (A, C, D#)
+    (61 - x, 64 - x, 67 - x),  # C# diminished (C#, F, G)
+]
+
 
 # Define the melody for trumpet and violin
 melody_trumpet = [60, 62, 64, 65, 67, 69, 71, 72]  # C major scale
@@ -135,13 +122,6 @@ drum_pattern_3 = [
     (36, 0.5),  # Kick drum on beat 1
 ]
 
-# Function to play the piano chords
-def play_piano():
-    while True:
-        for chord in chords:
-            piano.play_chord(chord, 1, 2)  # Play each chord for 1.5 seconds
-            #piano.play_chord(chord, 1, 0.1)  # Play each chord for 1.5 seconds
-            wait(1)
 
 notes = [60, 62, 64, 67, 69]
 durada = [1.0, 2.0, 0.25, 0.5]
@@ -159,6 +139,7 @@ random_numbers_2 = [(random.choice(notes), random.choice(durada)) for _ in range
 
 def play_trumpet(notes, durations):
     # Pairing notes with durations
+    print("trumpets in the air")
     list_notes = list(zip(notes, durations))  # Creates a list of (note, duration) tuples
     
     # Infinite loop (be careful with this)
@@ -168,17 +149,25 @@ def play_trumpet(notes, durations):
             wait(duration / 2)  # Wait for half the duration
 
 # Function to play the violin melody
-def play_violin():
+def play_violin(notes, durations):
+    print("violin in the air")
+    list_notes = list(zip(notes, durations))  # Creates a list of (note, duration) tuples
+    
+    # Infinite loop (be careful with this)
     while True:
-        for note, duration in random_numbers_2:
-            violin.play_note(note, 0.8, duration)
-            wait(duration/2)
+        for note, duration in list_notes:
+            violin.play_note(note, 0.6, duration)  # Play the note
+            wait(duration / 2)  # Wait for half the duration
 
-def play_piano():
+def play_piano(mood=0):
+    print("piano started")
+    if mood == 1:
+        chords = happy_chords
+    else:
+        chords = sad_chords
     while True:
         for chord in chords:
             piano.play_chord(chord, 1, 2)  # Play each chord for 1.5 seconds
-            #piano.play_chord(chord, 1, 0.1)  # Play each chord for 1.5 seconds
             wait(1)
 
 # Function to play the bassline
@@ -230,9 +219,10 @@ for paths in ALL_PATHS:
         air_status = [0 if value <= threshold_mapping['LIGHT %']["threshold"] else 1 for value in piano_data]
 
 
+        air_quality = 0
 
-        trumpet_notes = map_value_to_note(trumpet_data, air_status)
-        trumpet_duration = map_value_to_duration(trumpet_data, air_status)
+        trumpet_notes = map_value_to_note(trumpet_data, air_quality)
+        trumpet_duration = map_value_to_duration(trumpet_data)
         
 
         
@@ -245,9 +235,16 @@ for paths in ALL_PATHS:
         wait(9)
         session.fork(play_drums_3)
         wait(3)
-        session.fork(play_piano)
-        wait(12)
-        session.fork(play_trumpet(trumpet_notes, trumpet_duration))
+        session.fork(lambda: play_piano(air_quality))
+        wait(8)
+        #session.fork(play_trumpet(trumpet_notes, trumpet_duration))
+        if air_quality == 1:
+            print("did we check here?")
+            session.fork(lambda: play_trumpet(trumpet_notes, trumpet_duration))
+            wait(8)
+        else:
+            print("what about here?")
+            session.fork(lambda: play_violin(trumpet_notes, trumpet_duration))
         wait(12)
         #session.fork(play_violin)
         wait(400)

@@ -73,7 +73,7 @@ random_numbers_2 = [(random.choice(notes), random.choice(durada)) for _ in range
 def play_trumpet():
     while True:
         for note, duration in random_numbers:
-            trumpet.play_note(note, 0.8, duration)
+            trumpet.play_note(note, 0.2, duration)
             wait(duration/2)
 
 # Function to play the violin melody
